@@ -76,7 +76,7 @@ class SoundVisualizerWidget(Widget):
 		self.LINE_WIDTH = LINE_WIDTH
 
 		# set widget sizes and size hint
-		self.size = (self.BARS * self.BAR_WIDTH * self.LINE_WIDTH, 600)
+		self.size = (self.BARS * (self.BAR_WIDTH + self.LINE_WIDTH), 600)
 		self.size_hint_x = None
 
 	def _keyboard_closed(self):
@@ -94,7 +94,7 @@ class SoundVisualizerWidget(Widget):
 
 		datasrc = "./waveform.npy"
 		if not os.path.exists(datasrc):
-			for d in data:
+			for d in self.data:
 				if count < self.RATIO:
 					count = count + 1
 
@@ -149,7 +149,7 @@ class SoundVisualizerApp(App):
 		Config.set('graphics', 'height', '600')
 
 		#Read and parse audio data
-		src= "./test.mp3"
+		src= "./AdhesiveWombat - Anthem.mp3"#"./test.mp3"
 		audio = AudioSegment.from_file(src)
 		sound = SoundLoader.load(src)
 
