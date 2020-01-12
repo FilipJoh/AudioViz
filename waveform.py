@@ -69,10 +69,15 @@ class SoundVisualizerWidget(Widget):
 		self.audioToPlay = audioSound
 		self.data = np.fromstring(self.audioVizData._data, np.int16)
 
+		# Set some intitial values
 		self.BARS = BARS  #One bar per second
 		self.BAR_HEIGHT = BAR_HEIGHT
 		self.BAR_WIDTH = BAR_WIDTH
 		self.LINE_WIDTH = LINE_WIDTH
+
+		# set widget sizes and size hint
+		self.size = (self.BARS * self.BAR_WIDTH * self.LINE_WIDTH, 600)
+		self.size_hint_x = None
 
 	def _keyboard_closed(self):
 		self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -148,7 +153,7 @@ class SoundVisualizerApp(App):
 		audio = AudioSegment.from_file(src)
 		sound = SoundLoader.load(src)
 
-		sWig = SoundVisualizerWidget(audio, sound, size = (5000 * 2 * 20, 600), size_hint_x = None)
+		sWig = SoundVisualizerWidget(audio, sound)
 		sWig.preprocess_data()
 		sWig.start(1, 300.0)
 
