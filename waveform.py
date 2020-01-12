@@ -1,7 +1,6 @@
 from pydub import AudioSegment
-from pydub import generators
-from matplotlib import pyplot as plt
-from PIL import Image, ImageDraw
+
+
 import numpy as np
 import os
 from kivy.app import App
@@ -20,13 +19,7 @@ from pydub.playback import play
 import pdb
 
 src= "./test.mp3"
-"""audio = 0
-for i in range(10):
-	audio += generators.Sine(freq=440).to_audio_segment(duration=1000.0)
-	audio += AudioSegment.silent(duration=1000)
-audio.export(src)"""
 audio = AudioSegment.from_file(src)
-
 sound = SoundLoader.load(src)
 data = np.fromstring(audio._data, np.int16)
 
