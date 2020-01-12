@@ -56,21 +56,27 @@ class SoundVisualizerWidget(Widget):
 		self.pH.playHead_time = self.audioToPlay.get_pos()
 		self.pH.move()
 
-	def __init__(self, audioVisualSegment, audioSound, **kwargs):
+	def __init__(self,
+				audioVisualSegment,
+				audioSound,
+				BARS = 5000,
+				BAR_HEIGHT = 300,
+				BAR_WIDTH = 1,
+				LINE_WIDTH = 0,
+				**kwargs):
 		super(SoundVisualizerWidget, self).__init__(**kwargs)
 		self.audioVizData = audioVisualSegment
 		self.audioToPlay = audioSound
 		self.data = np.fromstring(self.audioVizData._data, np.int16)
 
+		self.BARS = BARS  #One bar per second
+		self.BAR_HEIGHT = BAR_HEIGHT
+		self.BAR_WIDTH = BAR_WIDTH
+		self.LINE_WIDTH = LINE_WIDTH
+
 	def _keyboard_closed(self):
 		self._keyboard.unbind(on_key_down=self._on_keyboard_down)
 		self._keyboard = None
-
-	def set_init_vals(self):
-		self.BARS = 5000  #One bar per second
-		self.BAR_HEIGHT = 300
-		self.BAR_WIDTH = 1
-		self.LINE_WIDTH = 1
 
 	def preprocess_data(self):
 		length = len(self.data)
@@ -143,7 +149,6 @@ class SoundVisualizerApp(App):
 		sound = SoundLoader.load(src)
 
 		sWig = SoundVisualizerWidget(audio, sound, size = (5000 * 2 * 20, 600), size_hint_x = None)
-		sWig.set_init_vals()
 		sWig.preprocess_data()
 		sWig.start(1, 300.0)
 
