@@ -14,6 +14,8 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.scrollview import ScrollView
 from kivy.config import Config
 
+import math
+
 import pdb
 
 class SoundBar(Widget):
@@ -86,39 +88,16 @@ class SoundVisualizerWidget(Widget):
 	def preprocess_data(self):
 		length = len(self.data)
 		self.RATIO = length/self.BARS
-		count = 0
-		maximum_item = 0
-		self.max_array = np.zeros(self.BARS)
-		highest_line = 0
-		index = 0
+		self.RATIO = int(math.ceil(self.RATIO))
 
-		datasrc = "./waveform.npy"
-		if not os.path.exists(datasrc):
-			for d in self.data:
-				if count < self.RATIO:
-					count = count + 1
+		residual = self.RATIO*self.BARS - length
+		residual_zeros = np.zeros(residual)
+		total_data = np.append(self.data, residual_zeros)
 
-					if abs(d) > maximum_item:
-						maximum_item = abs(d)
-				else:
-					self.max_array[index] = (maximum_item)
-					index += 1
-					if maximum_item > highest_line:
-						highest_line = maximum_item
+		Bins = np.split(total_data, self.BARS)
 
-					maximum_item = 0
-					count = 1
-
-			while len(self.max_array) < self.BARS:
-				self.max_array[index] = 0
-				index += 1
-
-			np.save(datasrc, self.max_array)
-		else:
-			barData = np.load(datasrc)
-			self.max_array = barData
-			highest_line = barData.max()
-		self.line_ratio = highest_line/self.BAR_HEIGHT
+		self.max_array = [np.max(arr) for arr in Bins]
+		self.line_ratio = np.max(self.max_array)/self.BAR_HEIGHT#highest_line/self.BAR_HEIGHT
 
 	def start(self, start_x, start_y):
 		self.current_x = start_x
@@ -151,9 +130,9 @@ class SoundVisualizerApp(App):
 		#Read and parse audio data
 		src= "./AdhesiveWombat - Anthem.mp3"#"./test.mp3"
 		audio = AudioSegment.from_file(src)
-		sound = SoundLoader.load(src)
+		self.sound = SoundLoader.load(src)
 
-		sWig = SoundVisualizerWidget(audio, sound)
+		sWig = SoundVisualizerWidget(audio, self.sound)
 		sWig.preprocess_data()
 		sWig.start(1, 300.0)
 
@@ -161,10 +140,30 @@ class SoundVisualizerApp(App):
 		sView.add_widget(sWig)
 		sView.do_scroll_x = True
 
-		sound.bind(on_play = sWig.schedule_animation)
-		sound.bind(on_stop = sWig.unSchedule_animation)
-		sound.play()
+		self.sound.bind(on_play = sWig.schedule_animation)
+		self.sound.bind(on_stop = sWig.unSchedule_animation)
+		self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+		self._keyboard.bind(on_key_down = self._on_keyboard_toggle)
+
+		self.sound_pos = 0
 		return sView
+
+	def _keyboard_closed(self):
+		self._keyboard.unbind(on_key_down=self._on_keyboard_toggle)
+		self._keyboard = None
+
+	def _on_keyboard_toggle(self, keyboard, keycode, text, modifiers):
+		#pdb.set_trace()
+		if keycode[1] == 'spacebar':
+			if self.sound.state == 'stop':
+				self.sound.play()
+				if self.sound_pos < self.sound.length:
+					self.sound.seek(self.sound_pos)
+			else:
+				self.sound_pos = self.sound.get_pos()
+				self.sound.stop()
+		return True
+
 
 if __name__ == '__main__':
 	SoundVisualizerApp().run()
