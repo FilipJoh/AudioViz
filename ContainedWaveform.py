@@ -51,6 +51,10 @@ class PlayHead(Widget):
 		newPos_x = self.playHead_time * self.visual_audio_rate + self.start_x
 		self.rect.pos = (newPos_x, 100.0)
 
+	def move_visual(self):
+		new_time = self.rect.pos[0] / self.visual_audio_rate
+		self.playHead_time = new_time
+
 class SoundVisualizer(Widget):
 	speed = NumericProperty(0)
 
@@ -132,13 +136,21 @@ class SoundVisualizer(Widget):
 
 
 	def schedule_animation(self, sound):
-		event = Clock.schedule_interval(self.update_playhead, 1 / 30. )#/ 30.)
+		event = Clock.schedule_interval(self.update_playhead, 1 / 60. )#/ 30.)
 		#pdb.set_trace()
 
 	def unSchedule_animation(self, sound):
 		Clock.unschedule(self.update_playhead)
 		self.hasPaused = True
 		#pdb.set_trace()
+
+	def on_touch_down(self, touch):
+		with self.canvas.before:
+			Color(1, 0, 0)
+			Rectangle(pos = touch.pos, size = (10, 10))
+		self.pH.rect.pos = (touch.pos[0], self.pH.rect.pos[1])
+		self.pH.move_visual()
+
 
 class ScrollableSoundVizualizer(ScrollView):
 
