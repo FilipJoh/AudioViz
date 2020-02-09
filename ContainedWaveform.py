@@ -190,11 +190,13 @@ class SoundVisualizerApp(App):
 		#pdb.set_trace()
 		if keycode[1] == 'spacebar':
 			if self.sound.state == 'stop':
+				app = App.get_running_app()
+				self.sound_pos = app.root.visualizer.pH.playHead_time
+				print("sound_pos {}".format(self.sound_pos))
 				self.sound.play()
 				if self.sound_pos < self.sound.length:
 					self.sound.seek(self.sound_pos)
 			else:
-				self.sound_pos = self.sound.get_pos()
 				self.sound.stop()
 		return True
 
