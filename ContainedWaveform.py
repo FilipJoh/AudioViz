@@ -124,11 +124,14 @@ class SoundVisualizer(Widget):
 
 		self.bars_on_canvas = [None] * self.BARS
 		for i in range(self.BARS):
-			with self.canvas:
+			with self.canvas.after:
 				Color(1.0,1.,1.)
 				item_height = self.max_array[i] / self.line_ratio
 				y_coord = ( - item_height)/2 + start_y
-				self.bars_on_canvas[i] = (SoundBar(self.current_x, y_coord, item_height, self.BAR_WIDTH))
+				SBar = SoundBar(self.current_x, y_coord, item_height, self.BAR_WIDTH)
+				self.bars_on_canvas[i] = (SBar)
+				self.add_widget(SBar, 0)
+				#self.add_widget()
 			self.current_x = self.current_x + self.LINE_WIDTH + self.BAR_WIDTH
 
 		with self.canvas:
@@ -145,11 +148,13 @@ class SoundVisualizer(Widget):
 		#pdb.set_trace()
 
 	def on_touch_down(self, touch):
+		print("in widget")
 		with self.canvas.before:
 			Color(1, 0, 0)
 			Rectangle(pos = touch.pos, size = (10, 10))
 		self.pH.rect.pos = (touch.pos[0], self.pH.rect.pos[1])
 		self.pH.move_visual()
+		super(SoundVisualizer, self).on_touch_down(touch)
 
 
 class ScrollableSoundVizualizer(ScrollView):
@@ -159,7 +164,7 @@ class ScrollableSoundVizualizer(ScrollView):
 		self.visualizer = SoundVisualizer(audioViz, sound)
 		self.visualizer.preprocess_data()
 		self.visualizer.start(1, 300.0)
-		self.add_widget(self.visualizer)
+		self.add_widget(self.visualizer, 0)
 		self.size_hint_x = None
 		self.size = Window.size
 		self.do_scroll_x = True
