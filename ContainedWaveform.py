@@ -149,11 +149,14 @@ class SoundVisualizer(Widget):
 
 	def on_touch_down(self, touch):
 		print("in widget")
-		with self.canvas.before:
-			Color(1, 0, 0)
-			Rectangle(pos = touch.pos, size = (10, 10))
-		self.pH.rect.pos = (touch.pos[0], self.pH.rect.pos[1])
-		self.pH.move_visual()
+		if touch.y > self.pH.rect.pos[1]:
+			with self.canvas:
+				Color(1, 0, 0)
+				#Rectangle(pos = touch.pos, size = (10, 10))
+			self.pH.rect.pos = (touch.pos[0], self.pH.rect.pos[1])
+			self.pH.move_visual()
+
+			print("Touch y: {} below: {}".format(touch.y, self.pH.rect.pos[1]))
 		super(SoundVisualizer, self).on_touch_down(touch)
 
 
