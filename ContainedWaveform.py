@@ -124,28 +124,25 @@ class SoundVisualizer(Widget):
 
 		self.bars_on_canvas = [None] * self.BARS
 		for i in range(self.BARS):
-			with self.canvas.after:
+			with self.canvas:
 				Color(1.0,1.,1.)
 				item_height = self.max_array[i] / self.line_ratio
 				y_coord = ( - item_height)/2 + start_y
 				SBar = SoundBar(self.current_x, y_coord, item_height, self.BAR_WIDTH)
 				self.bars_on_canvas[i] = (SBar)
-				self.add_widget(SBar, 0)
-				#self.add_widget()
+				self.add_widget(SBar, 1)
 			self.current_x = self.current_x + self.LINE_WIDTH + self.BAR_WIDTH
 
 		with self.canvas:
 			self.pH = PlayHead(len(self.audioVizData)/1000,len(self.max_array) * (self.LINE_WIDTH + self.BAR_WIDTH), 1)
-
+			self.add_widget(self.pH)
 
 	def schedule_animation(self, sound):
 		event = Clock.schedule_interval(self.update_playhead, 1 / 60. )#/ 30.)
-		#pdb.set_trace()
 
 	def unSchedule_animation(self, sound):
 		Clock.unschedule(self.update_playhead)
 		self.hasPaused = True
-		#pdb.set_trace()
 
 	def on_touch_down(self, touch):
 		print("in widget")
@@ -171,6 +168,7 @@ class ScrollableSoundVizualizer(ScrollView):
 		self.size_hint_x = None
 		self.size = Window.size
 		self.do_scroll_x = True
+		self.scroll_type = ['content','bars']
 
 		sound.bind(on_play = self.visualizer.schedule_animation)
 		sound.bind(on_stop = self.visualizer.unSchedule_animation)
