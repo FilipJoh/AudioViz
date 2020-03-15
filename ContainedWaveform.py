@@ -59,20 +59,26 @@ class SoundVisualizer(Widget):
 	speed = NumericProperty(0)
 
 	def update_playhead(self, dt):
+		# Move the playhead
 		sound_time = self.audioToPlay.get_pos()
-		scroll_x = 1.0 / self.pH.song_length * sound_time
-
-		if self.hasPaused:
-			if sound_time == 0.0:
-				self.parent.scroll_x = self.old_scroll#pdb.set_trace()
-				print("old_scroll: {}, scroll_x {}, scrollbar {}, playHead_audio {}".format( self.old_scroll, scroll_x, self.parent.scroll_x, self.pH.playHead_time))
-			self.hasPaused = False
-		else:
-			self.pH.playHead_time = sound_time
-			self.parent.scroll_x = scroll_x
-
+		self.pH.playHead_time = sound_time
 		self.pH.move()
-		self.old_scroll = 1.0 / self.pH.song_length * self.pH.playHead_time
+
+		# Handle scrolling
+		# Step 1. set intitial interpolation value
+		if self.hasPaused:
+			self.initial_scroll_at_play = self.parent.scroll_x
+			self.initial_song_time = self.initial_scroll_at_play * self.pH.song_length
+			self.scroll_offset = sound_time / self.pH.song_length - self.initial_scroll_at_play
+			self.hasPaused = False
+
+		# Step 2. Calculate scroll velocity
+		range_scrollspace = 1.0 - self.initial_scroll_at_play  # 1.0 is end point in scroll space
+		range_song_space = self.pH.song_length - self.initial_song_time
+		scroll_velocity = range_scrollspace/range_song_space
+
+		#Step 3. Calculate current scroll_x
+		self.parent.scroll_x = scroll_velocity * sound_time - self.scroll_offset
 
 	def __init__(self,
 				audioVisualSegment,
@@ -87,8 +93,10 @@ class SoundVisualizer(Widget):
 		self.audioToPlay = audioSound
 		self.data = np.fromstring(self.audioVizData._data, np.int16)
 
-		self.old_scroll = 0.0
+		self.scroll_offset = 0.0
 		self.hasPaused = False
+		self.initial_scroll_at_play = 0.0
+		self.initial_song_time = 0.0
 
 		# Set some intitial values
 		self.BARS = BARS  #One bar per second
